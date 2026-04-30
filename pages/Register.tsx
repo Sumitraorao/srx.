@@ -69,11 +69,11 @@ const Register: React.FC = () => {
        </div>
 
        {/* Navigation Return */}
-       <Link to="/" className="absolute top-8 left-8 z-20 flex items-center text-slate-400 hover:text-white transition-colors">
+       <Link to="/" className="absolute top-8 left-8 z-20 flex items-center text-slate-400 hover:text-white transition-all active:scale-95">
           <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center mr-3 border border-white/10 backdrop-blur-md">
              <span className="font-bold text-lg text-white">S</span>
           </div>
-          <span className="text-sm font-medium tracking-wide">Back to Home</span>
+          <span className="text-sm font-medium tracking-wide text-white">Back to Home</span>
        </Link>
 
        <motion.div 
@@ -167,7 +167,7 @@ const Register: React.FC = () => {
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-purple-500/20 transition-all transform hover:-translate-y-1 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center mt-6"
+                    className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-purple-500/20 transition-all transform hover:-translate-y-1 active:translate-y-0 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center mt-6"
                 >
                     {isLoading ? <Loader2 className="animate-spin h-5 w-5" /> : (
                         <>Create Account <ArrowRight size={18} className="ml-2" /></>

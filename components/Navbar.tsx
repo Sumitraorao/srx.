@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Menu, X, ChevronDown, User, LogOut, LayoutGrid } from 'lucide-react';
+import { Search, Menu, X, ChevronDown, User, LogOut, LayoutGrid, Shield } from 'lucide-react';
 import { NAV_ITEMS, ENTERPRISE_NAV_ITEMS } from '../constants';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ProductsMenu from './ProductsMenu';
@@ -112,7 +112,7 @@ const Navbar: React.FC = () => {
           
           {/* Logo and Desktop Nav */}
           <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0 flex items-center cursor-pointer group">
+            <Link to="/" className="flex-shrink-0 flex items-center cursor-pointer group active:scale-95 transition-transform">
               <div className="w-10 h-10 bg-gradient-to-br from-brand-red to-yellow-500 rounded flex items-center justify-center text-white font-bold text-xl mr-2 group-hover:opacity-90 transition-opacity">
                 S
               </div>
@@ -183,9 +183,16 @@ const Navbar: React.FC = () => {
             
             {/* Replaced English selector with Dashboard link for logged-in users */}
             {!isEnterprise && user && (
-                <Link to="/dashboard" className="flex items-center text-gray-600 text-sm font-medium cursor-pointer hover:text-brand-blue transition-colors">
-                  <LayoutGrid size={16} className="mr-1" /> Dashboard
-                </Link>
+                <div className="flex items-center gap-4">
+                  {user.role === 'super-admin' && (
+                    <Link to="/admin" className="flex items-center text-indigo-600 text-sm font-bold cursor-pointer hover:text-indigo-800 transition-colors bg-indigo-50 px-2.5 py-1 rounded-md border border-indigo-100">
+                      <Shield size={14} className="mr-1" /> Admin
+                    </Link>
+                  )}
+                  <Link to="/dashboard" className="flex items-center text-gray-600 text-sm font-medium cursor-pointer hover:text-brand-blue transition-colors">
+                    <LayoutGrid size={16} className="mr-1" /> Dashboard
+                  </Link>
+                </div>
             )}
             
             {!isEnterprise && (
@@ -213,7 +220,7 @@ const Navbar: React.FC = () => {
             {/* If user is logged in, show Dashboard button, else show Sign Up/Contact */}
             <button 
               onClick={handleActionClick}
-              className={`px-4 py-2 rounded text-sm font-bold transition-colors shadow-sm flex items-center ${
+              className={`px-4 py-2 rounded text-sm font-bold transition-all shadow-sm flex items-center active:scale-95 ${
                   isEnterprise 
                   ? 'bg-brand-red text-white hover:bg-brand-darkRed' 
                   : (user ? 'bg-brand-blue text-white hover:bg-blue-700' : 'bg-brand-red text-white hover:bg-brand-darkRed')

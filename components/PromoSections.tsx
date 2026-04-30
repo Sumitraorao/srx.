@@ -73,14 +73,14 @@ export const SrxOneSection: React.FC = () => {
                         href="https://www.linkedin.com/in/sumit-rao-0a16a6253" 
                         target="_blank" 
                         rel="noreferrer"
-                        className="bg-[#0077b5] hover:bg-[#006396] text-white font-bold py-3.5 px-8 rounded-xl transition-all hover:-translate-y-1 shadow-xl hover:shadow-blue-900/50 flex items-center group"
+                        className="bg-[#0077b5] hover:bg-[#006396] text-white font-bold py-3.5 px-8 rounded-xl transition-all active:scale-95 hover:-translate-y-1 shadow-xl hover:shadow-blue-900/50 flex items-center group"
                     >
                         <Linkedin size={20} className="mr-2 group-hover:animate-bounce" />
                         Connect on LinkedIn
                     </a>
                     <a 
                         href="mailto:sr9723612@gmail.com"
-                        className="bg-white/10 hover:bg-white/20 text-white font-bold py-3.5 px-8 rounded-xl transition-all hover:-translate-y-1 backdrop-blur-md border border-white/20 flex items-center group shadow-lg"
+                        className="bg-white/10 hover:bg-white/20 text-white font-bold py-3.5 px-8 rounded-xl transition-all active:scale-95 hover:-translate-y-1 backdrop-blur-md border border-white/20 flex items-center group shadow-lg"
                     >
                         <Mail size={20} className="mr-2 group-hover:text-yellow-400 transition-colors" />
                         Email Me
@@ -171,8 +171,8 @@ export const TrustedBySection: React.FC = () => {
             </motion.span>
           ))}
         </motion.div>
-        <div className="mt-8 text-center">
-            <Link to="/customers" className="text-blue-600 font-semibold text-sm hover:underline flex items-center justify-center">
+        <div className="mt-8 text-center text-white">
+            <Link to="/customers" className="text-blue-600 font-semibold text-sm hover:underline flex items-center justify-center transition-all active:scale-95">
                 CUSTOMER STORIES <ChevronRight size={14} />
             </Link>
         </div>
@@ -205,7 +205,7 @@ export const AiSection: React.FC = () => {
           </p>
           <Link 
             to="/ai"
-            className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full transition-all hover:shadow-lg hover:-translate-y-1 inline-flex items-center mx-auto"
+            className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full transition-all active:scale-95 hover:shadow-lg hover:-translate-y-1 inline-flex items-center mx-auto"
           >
             EXPLORE SRXAI <ArrowRight size={18} className="ml-2" />
           </Link>
@@ -258,7 +258,7 @@ export const EnterpriseSection: React.FC = () => {
                     <p className="text-xl text-gray-700 mb-6 font-light">
                         Experience the breadth and depth of the SRXHUB ecosystem, with the professional services, infrastructure, support, and security that a large business needs.
                     </p>
-                    <Link to="/enterprise" className="inline-flex items-center bg-blue-700 text-white font-bold py-3 px-6 rounded hover:bg-blue-800 transition-colors shadow-md hover:shadow-lg">
+                    <Link to="/enterprise" className="inline-flex items-center bg-blue-700 text-white font-bold py-3 px-6 rounded transition-all active:scale-95 hover:bg-blue-800 shadow-md hover:shadow-lg">
                         LEARN MORE <ArrowRight size={18} className="ml-2" />
                     </Link>
                 </motion.div>
@@ -282,7 +282,7 @@ export const PrivacySection: React.FC = () => {
                 <p className="text-gray-600 text-lg mb-8 leading-relaxed">
                     We believe that trust is paramount in a relationship. We do not own or sell your data, and we most certainly do not bank on advertising-based business models. The only way we make money is from the software license fees you pay us.
                 </p>
-                <Link to="/security" className="border-2 border-gray-300 text-gray-600 hover:border-gray-800 hover:text-gray-900 font-bold py-3 px-8 rounded transition-colors inline-flex items-center mx-auto">
+                <Link to="/security" className="border-2 border-gray-300 text-gray-600 active:scale-95 hover:border-gray-800 hover:text-gray-900 font-bold py-3 px-8 rounded transition-all inline-flex items-center mx-auto">
                     <Play size={16} className="mr-2" /> WATCH VIDEO
                 </Link>
             </motion.div>
@@ -340,7 +340,7 @@ export const ValuesSection: React.FC = () => {
                    transition={{ delay: 0.5 }}
                    className="text-center mt-12"
                 >
-                    <Link to="/customers" className="bg-blue-600 text-white font-bold py-3 px-8 rounded hover:bg-blue-700 transition-colors shadow-md">
+                    <Link to="/customers" className="bg-blue-600 text-white font-bold py-3 px-8 rounded hover:bg-blue-700 transition-all active:scale-95 shadow-md">
                         READ OUR STORY
                     </Link>
                 </motion.div>

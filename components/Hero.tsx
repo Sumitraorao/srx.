@@ -55,7 +55,7 @@ const Hero: React.FC = () => {
             >
               <Link 
                 to={isLoggedIn ? "/dashboard" : "/register"} 
-                className="inline-block bg-brand-red hover:bg-brand-darkRed text-white text-lg font-bold py-4 px-8 rounded shadow-lg transition-transform hover:-translate-y-1"
+                className="inline-block bg-brand-red hover:bg-brand-darkRed text-white text-lg font-bold py-4 px-8 rounded shadow-lg transition-all hover:-translate-y-1 active:translate-y-0 active:scale-95"
               >
                 {isLoggedIn ? "GO TO DASHBOARD" : "GET STARTED FOR FREE"}
               </Link>
@@ -90,7 +90,7 @@ const Hero: React.FC = () => {
                   <div 
                     key={app.name} 
                     onClick={() => navigate(`/product/${app.id}`)}
-                    className="flex group cursor-pointer p-2 rounded hover:bg-gray-50 transition-colors"
+                    className="flex group cursor-pointer p-2 rounded hover:bg-gray-50 transition-all active:scale-[0.98]"
                   >
                     <div className={`mr-4 p-2 rounded-lg bg-gray-50 group-hover:bg-white shadow-sm ${app.color}`}>
                       <app.icon size={28} strokeWidth={1.5} />
@@ -107,7 +107,7 @@ const Hero: React.FC = () => {
               </div>
 
               <div className="mt-8 pt-6 border-t border-gray-100">
-                <Link to="/products" className="flex items-center text-blue-600 font-bold text-sm hover:underline tracking-wide uppercase">
+                <Link to="/products" className="flex items-center text-blue-600 font-bold text-sm hover:underline tracking-wide uppercase active:scale-95 transition-transform inline-flex">
                   Explore all products <ArrowRight size={16} className="ml-2" />
                 </Link>
               </div>

@@ -183,6 +183,7 @@ export const FOOTER_LINKS: FooterSection[] = [
         { label: 'Events', href: '#' },
         { label: 'Branding Assets', href: '#' },
         { label: 'Security', href: '/security' },
+        { label: 'Admin Login', href: '/login' },
         { label: 'Compliance', href: '#' }
     ]
   }

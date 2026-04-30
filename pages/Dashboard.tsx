@@ -64,34 +64,34 @@ const Dashboard = () => {
         </div>
         
         <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
-           <Link to="/dashboard" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-blue-50 text-brand-blue">
+           <Link to="/dashboard" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-blue-50 text-brand-blue active:scale-[0.98] transition-transform">
               <LayoutGrid size={20} className="mr-3" /> Dashboard
            </Link>
-           <Link to="/app/crm" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+           <Link to="/app/crm" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-[0.98]">
               <Users size={20} className="mr-3" /> CRM
            </Link>
-           <Link to="/app/mail" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+           <Link to="/app/mail" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-[0.98]">
               <Mail size={20} className="mr-3" /> Mail
            </Link>
-           <Link to="/app/books" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+           <Link to="/app/books" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-[0.98]">
               <BookOpen size={20} className="mr-3" /> Books
            </Link>
-           <Link to="/app/people" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+           <Link to="/app/people" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-[0.98]">
               <UserCheck size={20} className="mr-3" /> People
            </Link>
-           <Link to="/app/desk" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+           <Link to="/app/desk" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-[0.98]">
               <Headphones size={20} className="mr-3" /> Desk
            </Link>
-           <Link to="/products" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+           <Link to="/products" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-[0.98]">
               <Plus size={20} className="mr-3" /> Explore Apps
            </Link>
-           <Link to="/security" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+           <Link to="/security" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-[0.98]">
               <Settings size={20} className="mr-3" /> Settings
            </Link>
         </nav>
 
         <div className="p-4 border-t border-gray-100 shrink-0">
-           <button onClick={handleLogout} className="flex items-center w-full px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+           <button onClick={handleLogout} className="flex items-center w-full px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-all active:scale-95">
               <LogOut size={20} className="mr-3" /> Sign Out
            </button>
         </div>
@@ -127,7 +127,10 @@ const Dashboard = () => {
             </div>
 
             <div className="flex items-center space-x-2 sm:space-x-4">
-               <button className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 relative">
+               <button 
+                onClick={() => alert('No new notifications.')}
+                className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 relative active:scale-90 transition-transform"
+              >
                   <Bell size={20} />
                   <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
                </button>
@@ -155,7 +158,7 @@ const Dashboard = () => {
                <div className="mb-10">
                   <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-bold text-gray-800">My Apps</h2>
-                      <button onClick={() => navigate('/products')} className="text-sm text-brand-blue font-bold hover:underline flex items-center">
+                      <button onClick={() => navigate('/products')} className="text-sm text-brand-blue font-bold hover:underline flex items-center active:scale-95 transition-transform">
                           View All <ChevronRight size={16} />
                       </button>
                   </div>
@@ -171,7 +174,7 @@ const Dashboard = () => {
                                       navigate(`/app/${app.id}`);
                                   }
                               }} 
-                              className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
+                              className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all cursor-pointer group active:scale-[0.98]"
                           >
                               <div className={`w-12 h-12 ${app.color.replace('text-', 'bg-').replace('500', '100')} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                                   <app.icon className={app.color} size={24} />
@@ -180,7 +183,7 @@ const Dashboard = () => {
                               <p className="text-xs text-gray-500 line-clamp-2">{app.description}</p>
                           </div>
                       ))}
-                      <div onClick={() => navigate('/products')} className="bg-gray-50 border-2 border-dashed border-gray-300 p-6 rounded-xl flex flex-col items-center justify-center text-center cursor-pointer hover:bg-white hover:border-brand-blue transition-colors group">
+                      <div onClick={() => navigate('/products')} className="bg-gray-50 border-2 border-dashed border-gray-300 p-6 rounded-xl flex flex-col items-center justify-center text-center cursor-pointer hover:bg-white hover:border-brand-blue transition-all group active:scale-[0.98]">
                           <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mb-2 group-hover:bg-blue-50 group-hover:text-brand-blue transition-colors">
                               <Plus size={20} />
                           </div>
@@ -236,7 +239,7 @@ const Dashboard = () => {
                    <div className="bg-gradient-to-br from-brand-dark to-gray-900 rounded-xl shadow-lg p-6 text-white h-fit">
                        <h3 className="font-bold text-lg mb-2">Upgrade to Enterprise</h3>
                        <p className="text-sm text-gray-400 mb-6">Unlock advanced security, unlimited apps, and 24/7 dedicated support.</p>
-                       <button onClick={() => navigate('/enterprise')} className="w-full py-3 bg-brand-red hover:bg-brand-darkRed rounded-lg font-bold text-sm transition-colors shadow-lg">
+                       <button onClick={() => navigate('/enterprise')} className="w-full py-3 bg-brand-red hover:bg-brand-darkRed rounded-lg font-bold text-sm transition-all shadow-lg active:scale-95">
                            VIEW PLANS
                        </button>
                    </div>

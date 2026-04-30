@@ -88,7 +88,7 @@ const Home: React.FC = () => {
                  transition={{ duration: 0.8 }}
               >
                   <h2 className="text-4xl md:text-6xl font-bold font-serif mb-4">SRXHUB <br/> CONNECT 2025</h2>
-                  <Link to="/contact" className="inline-block mt-4 border-2 border-white px-8 py-3 font-bold hover:bg-white hover:text-black transition-all hover:scale-105">
+                  <Link to="/contact" className="inline-block mt-4 border-2 border-white px-8 py-3 font-bold hover:bg-white hover:text-black transition-all hover:scale-105 active:scale-95 shadow-xl">
                       Register Now
                   </Link>
               </motion.div>

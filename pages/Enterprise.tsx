@@ -56,10 +56,10 @@ const Enterprise: React.FC = () => {
                 A unified operating system for your business. Secure, scalable, and customizable solutions designed for the modern enterprise.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/contact" className="inline-flex justify-center items-center bg-gray-900 hover:bg-black text-white text-lg font-bold py-4 px-8 rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1">
+                <Link to="/contact" className="inline-flex justify-center items-center bg-gray-900 hover:bg-black text-white text-lg font-bold py-4 px-8 rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 active:translate-y-0 active:scale-95">
                   Contact Sales <ArrowRight size={20} className="ml-2" />
                 </Link>
-                <Link to="/contact" className="inline-flex justify-center items-center bg-white text-gray-900 border border-gray-200 hover:border-gray-400 text-lg font-bold py-4 px-8 rounded-xl transition-all">
+                <Link to="/contact" className="inline-flex justify-center items-center bg-white text-gray-900 border border-gray-200 hover:border-gray-400 text-lg font-bold py-4 px-8 rounded-xl transition-all active:scale-95">
                    View Demo
                 </Link>
               </div>
@@ -334,7 +334,7 @@ const Enterprise: React.FC = () => {
                       <p className="text-gray-400 text-lg mb-8 leading-relaxed">
                           At SRXHUB, we take data privacy and security seriously at every level of our business, from product development to vendor standards. We also comply with all applicable data protection laws.
                       </p>
-                      <Link to="/security" className="border-2 border-white hover:bg-white hover:text-black text-white font-bold py-3 px-8 rounded-xl transition-colors inline-block">
+                      <Link to="/security" className="border-2 border-white hover:bg-white hover:text-black text-white font-bold py-3 px-8 rounded-xl transition-all inline-block active:scale-95">
                           LEARN MORE
                       </Link>
                   </div>
@@ -377,7 +377,7 @@ const Enterprise: React.FC = () => {
                        <span className="text-xl font-bold">Deloitte</span>
                        <span className="text-xl font-bold">Tata</span>
                    </div>
-                   <Link to="/partners" className="bg-brand-blue text-white font-bold py-3 px-8 rounded-xl text-sm hover:bg-blue-700 transition-colors inline-block shadow-lg">EXPLORE MORE</Link>
+                   <Link to="/partners" className="bg-brand-blue text-white font-bold py-3 px-8 rounded-xl text-sm hover:bg-blue-700 transition-all inline-block shadow-lg active:scale-95">EXPLORE MORE</Link>
                </div>
            </div>
       </section>
