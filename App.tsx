@@ -28,6 +28,7 @@ import BooksApp from './pages/BooksApp';
 import PeopleApp from './pages/PeopleApp';
 import DeskApp from './pages/DeskApp';
 import GenericApp from './pages/GenericApp';
+import AdminPanel from './pages/AdminPanel';
 
 // Scroll to top on route change
 const ScrollToTop = () => {
@@ -47,12 +48,13 @@ function App() {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/complete-profile';
   const isChatPage = location.pathname === '/ai/chat';
   const isDashboard = location.pathname.startsWith('/dashboard');
+  const isAdmin = location.pathname.startsWith('/admin');
   const isApp = location.pathname.startsWith('/app/');
 
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900 flex flex-col">
       <ScrollToTop />
-      {(!isAuthPage && !isChatPage && !isDashboard && !isApp) && <Navbar />}
+      {(!isAuthPage && !isChatPage && !isDashboard && !isAdmin && !isApp) && <Navbar />}
       <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -74,6 +76,7 @@ function App() {
           <Route path="/policies" element={<Policies />} />
           <Route path="/mobile-apps" element={<MobileApps />} />
           <Route path="/developer-center" element={<DeveloperCenter />} />
+          <Route path="/admin" element={<AdminPanel />} />
           <Route path="/app/crm" element={<CrmApp />} />
           <Route path="/app/mail" element={<MailApp />} />
           <Route path="/app/books" element={<BooksApp />} />
@@ -82,7 +85,7 @@ function App() {
           <Route path="/app/:appId" element={<GenericApp />} />
         </Routes>
       </main>
-      {(!isAuthPage && !isChatPage && !isDashboard && !isApp) && <Footer />}
+      {(!isAuthPage && !isChatPage && !isDashboard && !isAdmin && !isApp) && <Footer />}
     </div>
   );
 }

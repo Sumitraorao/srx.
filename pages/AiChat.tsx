@@ -5,10 +5,10 @@ import {
   Menu, X, MessageSquare, Zap, Code, PenTool, BarChart, 
   Paperclip, Image as ImageIcon, FileText, Shield, 
   MoreHorizontal, Download, Trash2, ShieldCheck, Terminal, Maximize2, Moon, Sun, 
-  Palette
+  Palette, ArrowLeft
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { GoogleGenAI } from "@google/genai";
 
 // --- Types ---
@@ -194,6 +194,7 @@ const FileMessage = ({ filename, size }: { filename: string, size: string }) => 
 // --- Main Chat Page ---
 
 const AiChat: React.FC = () => {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   
@@ -244,33 +245,30 @@ const AiChat: React.FC = () => {
     setIsTyping(true);
     
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-        let modelName = 'gemini-2.5-flash'; // Default for text
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        let modelName = 'gemini-3-flash-preview'; 
         let isImageRequest = forceImageMode;
 
-        // Enhanced Intent Detection for Image Generation (Includes Hinglish/Hindi)
         const lowerPrompt = prompt.toLowerCase();
         const imageKeywords = [
             'generate image', 'create an image', 'draw', 'paint', 'picture of', 'visualize', 'sketch', 'render', 
-            'photo', 'image', 'tasveer', 'chitra', 'banao', 'dikhao', 'khencho', 'pic', 'art'
+            'photo', 'image', 'tasveer', 'chitra', 'banao', 'dikhao', 'khencho', 'pic', 'art', 'generation'
         ];
 
         // Check if user is asking for an image via keywords if not forced
-        if (!isImageRequest && imageKeywords.some(keyword => lowerPrompt.includes(keyword))) {
+        if (isImageRequest || imageKeywords.some(keyword => lowerPrompt.includes(keyword))) {
             modelName = 'gemini-2.5-flash-image';
             isImageRequest = true;
-        }
-
-        // If forced mode, enforce model
-        if (forceImageMode) {
-             modelName = 'gemini-2.5-flash-image';
+        } else if (lowerPrompt.includes('code') || lowerPrompt.includes('program') || lowerPrompt.includes('script') || lowerPrompt.includes('app')) {
+            modelName = 'gemini-3.1-pro-preview';
+        } else {
+            modelName = 'gemini-3-flash-preview';
         }
 
         let contents: any = null;
 
         if (file) {
             const base64Data = await fileToBase64(file);
-            // If file is provided, we send it as a part
             contents = {
                 parts: [
                     { 
@@ -282,21 +280,8 @@ const AiChat: React.FC = () => {
                     { text: prompt || "Analyze this file" }
                 ]
             };
-            // If user explicitly asks for image generation/editing with an input image, use flash-image
-            if (isImageRequest) {
-                 modelName = 'gemini-2.5-flash-image';
-            }
         } else {
-             // Text only prompt
-             if (isImageRequest) {
-                 // For image generation, sometimes adding "Generate an image of" helps the model context if the user just typed "cat"
-                 const augmentedPrompt = prompt.length < 20 ? `Generate a high quality image of ${prompt}` : prompt;
-                 contents = {
-                    parts: [{ text: augmentedPrompt }]
-                 };
-             } else {
-                 contents = prompt;
-             }
+             contents = prompt;
         }
 
         const response = await ai.models.generateContent({
@@ -307,34 +292,70 @@ const AiChat: React.FC = () => {
         const newMessages: Message[] = [];
         const msgId = Date.now().toString();
 
-        // Check for parts in response (Nano Banana / Flash Image model structure often returns parts)
         if (response.candidates?.[0]?.content?.parts) {
             for (const part of response.candidates[0].content.parts) {
                 if (part.inlineData) {
-                    // Handle Image Response
                     const base64String = part.inlineData.data;
                     const mimeType = part.inlineData.mimeType || 'image/png';
                     newMessages.push({
                         id: msgId + '_img',
                         role: 'assistant',
                         type: 'image',
-                        content: isImageRequest ? `Generated result for: "${prompt}"` : "I've generated this visualization for you:",
+                        content: isImageRequest ? `Generated result for: "${prompt}"` : "Generated visualization:",
                         data: { url: `data:${mimeType};base64,${base64String}` },
                         timestamp: new Date()
                     });
                 } else if (part.text) {
-                    // Handle Text Response part
-                    newMessages.push({
-                        id: msgId + '_text',
-                        role: 'assistant',
-                        type: 'text',
-                        content: part.text,
-                        timestamp: new Date()
-                    });
+                    // Check for code blocks in text
+                    const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+                    let lastIndex = 0;
+                    let match;
+                    let textFound = false;
+
+                    while ((match = codeBlockRegex.exec(part.text)) !== null) {
+                        textFound = true;
+                        // Text before code block
+                        if (match.index > lastIndex) {
+                            newMessages.push({
+                                id: `${msgId}_text_${lastIndex}`,
+                                role: 'assistant',
+                                type: 'text',
+                                content: part.text.substring(lastIndex, match.index),
+                                timestamp: new Date()
+                            });
+                        }
+                        // Code block
+                        newMessages.push({
+                            id: `${msgId}_code_${match.index}`,
+                            role: 'assistant',
+                            type: 'code',
+                            content: '',
+                            data: { language: match[1] || 'typescript', code: match[2] },
+                            timestamp: new Date()
+                        });
+                        lastIndex = codeBlockRegex.lastIndex;
+                    }
+
+                    if (!textFound) {
+                        newMessages.push({
+                            id: msgId + '_text',
+                            role: 'assistant',
+                            type: 'text',
+                            content: part.text,
+                            timestamp: new Date()
+                        });
+                    } else if (lastIndex < part.text.length) {
+                         newMessages.push({
+                            id: `${msgId}_text_end`,
+                            role: 'assistant',
+                            type: 'text',
+                            content: part.text.substring(lastIndex),
+                            timestamp: new Date()
+                        });
+                    }
                 }
             }
         } else if (response.text) {
-             // Standard text response
              newMessages.push({
                 id: msgId,
                 role: 'assistant',
@@ -379,29 +400,37 @@ const AiChat: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() && !selectedFile) return;
+    processSubmit(input, selectedFile);
+  };
+
+  const handleQuickAction = (prompt: string) => {
+    processSubmit(prompt, null);
+  };
+
+  const processSubmit = (prompt: string, file: File | null) => {
+    if (!prompt.trim() && !file) return;
 
     // --- Dynamic Recent Chat Generation ---
     if (messages.length === 0) {
         let chatTitle = "New Conversation";
-        if (input) {
-            chatTitle = input.length > 25 ? input.substring(0, 25) + "..." : input;
-        } else if (selectedFile) {
-            chatTitle = `Analysis: ${selectedFile.name}`;
+        if (prompt) {
+            chatTitle = prompt.length > 25 ? prompt.substring(0, 25) + "..." : prompt;
+        } else if (file) {
+            chatTitle = `Analysis: ${file.name}`;
         }
         setRecentChats(prev => [chatTitle, ...prev]);
     }
 
     // Handle File Message UI
-    if (selectedFile) {
+    if (file) {
         const fileMsg: Message = {
             id: Date.now().toString() + '_file',
             role: 'user',
             type: 'file',
             content: 'Uploaded a file',
             data: { 
-                filename: selectedFile.name, 
-                size: (selectedFile.size / 1024).toFixed(1) + ' KB' 
+                filename: file.name, 
+                size: (file.size / 1024).toFixed(1) + ' KB' 
             },
             timestamp: new Date()
         };
@@ -409,29 +438,26 @@ const AiChat: React.FC = () => {
     }
 
     // Handle Text Message UI
-    if (input.trim()) {
+    if (prompt.trim()) {
         const textMsg: Message = {
             id: Date.now().toString(),
             role: 'user',
             type: 'text',
-            content: input,
+            content: prompt,
             timestamp: new Date()
         };
         setMessages(prev => [...prev, textMsg]);
     }
 
-    const currentInput = input;
-    const currentFile = selectedFile;
-    const currentMode = isImageMode; // Capture current mode
+    const currentMode = isImageMode;
 
     // Reset Input
     setInput('');
     setSelectedFile(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
-    // Optional: Reset image mode after send? No, let user keep it if they want multiple images.
     
     // Trigger Real AI
-    generateResponse(currentInput || (currentFile ? "Analyze this file" : ""), currentFile, currentMode);
+    generateResponse(prompt || (file ? "Analyze this file" : ""), file, currentMode);
   };
 
   return (
@@ -533,6 +559,21 @@ const AiChat: React.FC = () => {
                   >
                       {isSidebarOpen && !isMobile ? <X size={20} /> : <Menu size={20} />}
                   </button>
+                  {/* Back to AI Button */}
+                  <button 
+                    onClick={() => {
+                        const user = localStorage.getItem('user');
+                        if (user) {
+                            navigate('/dashboard');
+                        } else {
+                            navigate('/ai');
+                        }
+                    }} 
+                    className="flex items-center space-x-1 text-gray-500 hover:text-indigo-600 transition-colors mr-2 sm:mr-4 text-xs font-bold bg-white/50 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg border border-gray-100 shadow-sm hover:shadow-md active:scale-95 group transition-all"
+                  >
+                      <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+                      <span className="hidden xs:inline">BACK</span>
+                  </button>
                   <div className="flex flex-col">
                       <div className="flex items-center">
                           <span className="font-bold text-lg text-gray-800 mr-2 tracking-tight">SrxAI</span>
@@ -585,7 +626,7 @@ const AiChat: React.FC = () => {
                            ].map((item, idx) => (
                                <button 
                                  key={idx}
-                                 onClick={() => setInput(item.prompt)}
+                                 onClick={() => handleQuickAction(item.prompt)}
                                  className="flex flex-col items-center justify-center p-4 md:p-6 bg-white border border-gray-100 rounded-2xl hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-100/50 transition-all group backdrop-blur-sm shadow-sm"
                                >
                                    <div className={`p-3 rounded-full ${item.bg} mb-3 group-hover:scale-110 transition-transform`}>

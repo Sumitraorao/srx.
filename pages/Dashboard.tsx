@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { 
   LayoutGrid, Users, Settings, Bell, Search, LogOut, 
   Plus, ChevronRight, Star, Clock, Menu, X,
-  Mail, BookOpen, UserCheck, Headphones
+  Mail, BookOpen, UserCheck, Headphones, Shield
 } from 'lucide-react';
 import { FEATURED_APPS } from '../constants';
 
@@ -190,7 +190,28 @@ const Dashboard = () => {
                </div>
 
                {/* Recent Activity / Widgets */}
-               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+               {user.role === 'super-admin' && (
+                    <div className="bg-white rounded-xl border border-indigo-200 shadow-sm p-6 mb-8 bg-gradient-to-r from-indigo-50 to-white">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-indigo-600 rounded-xl text-white">
+                                    <Shield size={24} />
+                                </div>
+                                <div className="min-w-0">
+                                    <h3 className="font-bold text-indigo-900 truncate">Administrator Console</h3>
+                                    <p className="text-sm text-indigo-600 line-clamp-1">You are logged in with full system-wide administrative privileges.</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => navigate('/admin')}
+                                className="px-6 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-md hover:bg-indigo-700 transition-all whitespace-nowrap active:scale-95"
+                            >
+                                Open Admin Panel
+                            </button>
+                        </div>
+                    </div>
+                )}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                    <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                        <h3 className="font-bold text-gray-800 mb-6 flex items-center">
                            <Clock size={18} className="mr-2 text-gray-400" /> Recent Activity

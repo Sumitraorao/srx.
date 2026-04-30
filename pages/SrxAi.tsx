@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { 
   Zap, MessageSquare, Bot, ArrowRight, Brain, Code, 
   Image as ImageIcon, BarChart, ShieldCheck, Database, 
-  Cpu, Layers, Sparkles, X, CheckCircle2
+  Cpu, Layers, Sparkles, X, CheckCircle2, ArrowLeft
 } from 'lucide-react';
 
 const SrxAi: React.FC = () => {
@@ -200,6 +200,24 @@ const SrxAi: React.FC = () => {
                     </Link>
                 </div>
             </motion.div>
+        </div>
+
+        {/* Back Button */}
+        <div className="absolute top-4 left-4 md:top-8 md:left-8 z-50">
+            <button 
+                onClick={() => {
+                    const user = localStorage.getItem('user');
+                    if (user) {
+                        navigate('/dashboard');
+                    } else {
+                        navigate('/');
+                    }
+                }}
+                className="flex items-center space-x-2 text-gray-500 hover:text-indigo-600 transition-all font-bold text-xs sm:text-sm bg-white/80 backdrop-blur-md px-3 py-2 sm:px-5 sm:py-2.5 rounded-full border border-gray-100 shadow-sm hover:shadow-lg active:scale-95 group"
+            >
+                <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                <span>BACK</span>
+            </button>
         </div>
       </section>
 

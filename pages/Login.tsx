@@ -49,7 +49,19 @@ const Login: React.FC = () => {
     setIsLoading(true);
     
     setTimeout(() => {
-        if (email && password.length >= 6) {
+        if (email === 'sr9723612@gmail.com' && password === '010python@@@') {
+            const adminUser = {
+                id: 'super-admin-001',
+                email: email,
+                first_name: 'Sumit',
+                last_name: 'Admin',
+                role: 'super-admin',
+                phone_number: '9723612000'
+            };
+            localStorage.setItem('accessToken', 'super_secret_admin_token');
+            localStorage.setItem('user', JSON.stringify(adminUser));
+            navigate('/admin');
+        } else if (email && password.length >= 6) {
              const mockUser = {
                 id: '1',
                 email: email,

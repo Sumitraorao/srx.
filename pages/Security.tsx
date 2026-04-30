@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform, Variants } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform, Variants } from 'motion/react';
 import { 
   ShieldCheck, Lock, Smartphone, Mail, UserCheck, 
   Eye, ArrowRight, Shield, CheckCircle, Server, Globe
@@ -83,7 +83,7 @@ const AnimatedImage: React.FC<{ src: string; alt: string }> = ({ src, alt }) => 
     }
   };
   
-  // Parallax Effect
+  // Parallax Effect - Only compute if ref is likely available
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"]

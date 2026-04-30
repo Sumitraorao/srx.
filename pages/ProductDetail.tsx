@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { PRODUCT_CATEGORIES } from '../constants';
 import { 
@@ -151,46 +151,43 @@ import { Cloud, FileText } from 'lucide-react';
 
 const ProductDetail = () => {
   const { id } = useParams();
-  const [product, setProduct] = useState<any>(null);
-  const [richData, setRichData] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
   const scrollRef = useRef(null);
 
-  // Parallax Logic
-  const { scrollYProgress } = useScroll({ target: scrollRef, offset: ["start start", "end start"] });
+  // 1. Find basic product info from constants (Synchronous)
+  const product = useMemo(() => {
+    for (const cat of PRODUCT_CATEGORIES) {
+        const p = cat.products.find(item => item.id === id);
+        if (p) return p;
+    }
+    return null;
+  }, [id]);
+
+  // 2. Find rich data or use generic (Synchronous)
+  const richData = useMemo(() => {
+    const specificData = id ? PRODUCT_DETAILS[id as string] : null;
+    if (specificData) return specificData;
+    
+    // Create generic rich data based on found product or default
+    return {
+        ...GENERIC_PRODUCT,
+        tagline: product?.description || "Empowering your business.",
+        heroTitle: product?.name || "Product Overview",
+        heroImage: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=2000",
+        icon: product?.icon || Layers
+    };
+  }, [id, product]);
+
+  // Parallax Logic - Using global scroll (scrollYProgress) as hero is at the top to avoid hydration errors
+  const { scrollYProgress } = useScroll({ offset: ["start start", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   useEffect(() => {
-    // 0. Check user
+    // Check user
     const storedUser = localStorage.getItem('user');
     if (storedUser) setUser(JSON.parse(storedUser));
-    // 1. Find basic product info from constants
-    let foundProduct = null;
-    for (const cat of PRODUCT_CATEGORIES) {
-        const p = cat.products.find(item => item.id === id);
-        if (p) {
-            foundProduct = p;
-            break;
-        }
-    }
-    setProduct(foundProduct);
-
-    // 2. Find rich data or use generic
-    const specificData = PRODUCT_DETAILS[id as string];
-    if (specificData) {
-        setRichData(specificData);
-    } else {
-        // Create generic rich data based on found product or default
-        setRichData({
-            ...GENERIC_PRODUCT,
-            tagline: foundProduct?.description || "Empowering your business.",
-            heroTitle: foundProduct?.name || "Product Overview",
-            heroImage: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=2000",
-            icon: foundProduct?.icon || Layers
-        });
-    }
     
     window.scrollTo(0,0);
   }, [id]);
