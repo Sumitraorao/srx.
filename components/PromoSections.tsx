@@ -17,7 +17,7 @@ const staggerContainer: Variants = {
 };
 
 export const SrxOneSection: React.FC = () => {
-  const profileImage = "https://media.licdn.com/dms/image/v2/D4D03AQFiEHOT-b1g0g/profile-displayphoto-scale_400_400/B4DZp3niyQKQAg-/0/1762943452042?e=1777507200&v=beta&t=-zOoq6a86s-BBc0eU467kb1ATZi7XVT7Ev8US-xeRG4"; 
+  const profileImage = "https://media.licdn.com/dms/image/v2/D4D03AQFiEHOT-b1g0g/profile-displayphoto-scale_400_400/B4DZp3niyQKQAg-/0/1762943452042?e=1779321600&v=beta&t=I_jmbfctG588h6i-KfAiQM-UXc7oooMTkkMexEwukLw"; 
 
   return (
     <section className="relative overflow-hidden py-24 border-b border-white/10 bg-gradient-to-br from-indigo-900 via-[#1e1b4b] to-purple-900 text-white">

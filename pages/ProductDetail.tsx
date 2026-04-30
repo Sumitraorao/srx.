@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { PRODUCT_CATEGORIES } from '../constants';
 import { 
   ArrowLeft, CheckCircle2, ChevronRight, Star, 
@@ -9,7 +9,7 @@ import {
   TrendingUp, Clock, CreditCard, Smile, Layout,
   Smartphone, Lock, Share2, Briefcase, DollarSign
 } from 'lucide-react';
-import { motion, useScroll, useTransform, Variants } from 'framer-motion';
+import { motion, useScroll, useTransform, Variants } from 'motion/react';
 
 // --- RICH DATA CONFIGURATION ---
 // This holds the specific storytelling elements for your top products
@@ -153,6 +153,8 @@ const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState<any>(null);
   const [richData, setRichData] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
+  const navigate = useNavigate();
   const scrollRef = useRef(null);
 
   // Parallax Logic
@@ -161,6 +163,9 @@ const ProductDetail = () => {
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   useEffect(() => {
+    // 0. Check user
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) setUser(JSON.parse(storedUser));
     // 1. Find basic product info from constants
     let foundProduct = null;
     for (const cat of PRODUCT_CATEGORIES) {
@@ -234,9 +239,24 @@ const ProductDetail = () => {
                       </p>
                       
                       <div className="flex flex-col sm:flex-row gap-4">
-                          <Link to="/register" className="bg-white text-gray-900 font-bold py-4 px-10 rounded-full shadow-2xl hover:shadow-white/20 hover:scale-105 transition-all flex items-center justify-center">
-                              Start Free Trial <ChevronRight size={20} className="ml-2" />
-                          </Link>
+                          {user ? (
+                            <button 
+                                onClick={() => {
+                                    if (id === 'crm') {
+                                        navigate('/app/crm');
+                                    } else {
+                                        navigate(`/app/${id}`);
+                                    }
+                                }} 
+                                className="bg-white text-gray-900 font-bold py-4 px-10 rounded-full shadow-2xl hover:shadow-white/20 hover:scale-105 transition-all flex items-center justify-center"
+                            >
+                                Launch {product?.name || 'App'} <ArrowRight size={20} className="ml-2" />
+                            </button>
+                          ) : (
+                            <Link to="/register" className="bg-white text-gray-900 font-bold py-4 px-10 rounded-full shadow-2xl hover:shadow-white/20 hover:scale-105 transition-all flex items-center justify-center">
+                                Start Free Trial <ChevronRight size={20} className="ml-2" />
+                            </Link>
+                          )}
                           <button onClick={() => window.scrollTo({ top: 800, behavior: 'smooth' })} className="border-2 border-white/30 hover:bg-white/10 text-white font-bold py-4 px-10 rounded-full transition-all">
                               How it Works
                           </button>

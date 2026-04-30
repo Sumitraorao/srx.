@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { getAllProducts } from '../services/mockApi';
 import { ProductCategory } from '../types';
 import { Search } from 'lucide-react';
@@ -8,6 +8,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 const Products: React.FC = () => {
   const [categories, setCategories] = useState<ProductCategory[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const [activeHash, setActiveHash] = useState<string>('');
   const navigate = useNavigate();
 
@@ -63,6 +64,17 @@ const Products: React.FC = () => {
     show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
   };
 
+  const filteredCategories = useMemo(() => {
+    if (!searchTerm) return categories;
+    return categories.map(cat => ({
+        ...cat,
+        products: cat.products.filter(p => 
+            p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+            p.description.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+    })).filter(cat => cat.products.length > 0);
+  }, [categories, searchTerm]);
+
   return (
     <div className="bg-gray-50 min-h-screen">
       
@@ -81,6 +93,8 @@ const Products: React.FC = () => {
                 type="text" 
                 placeholder="I'm looking for..." 
                 className="w-full py-4 px-6 pr-12 rounded-lg text-gray-900 shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
              />
              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400">
                  <Search size={24} />
@@ -94,7 +108,7 @@ const Products: React.FC = () => {
              {/* Mobile Sticky Category Nav */}
              <div className="lg:hidden sticky top-[64px] z-30 bg-white shadow-md rounded-lg mb-4 overflow-x-auto whitespace-nowrap py-3 px-2 hide-scrollbar">
                 <div className="flex space-x-2">
-                    {categories.map(cat => (
+                    {filteredCategories.map(cat => (
                         <button
                             key={cat.id}
                             onClick={() => scrollToSection(cat.id)}
@@ -115,7 +129,7 @@ const Products: React.FC = () => {
                  <div className="sticky top-24 bg-white rounded-lg shadow-md p-4">
                      <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 px-2">Apps</h3>
                      <ul className="space-y-1">
-                         {categories.map(cat => (
+                         {filteredCategories.map(cat => (
                              <li key={cat.id}>
                                  <button 
                                     onClick={() => scrollToSection(cat.id)}
@@ -136,7 +150,7 @@ const Products: React.FC = () => {
              {/* Main Content Area */}
              <div className="flex-1 pb-20">
                  <div className="space-y-16 mt-8">
-                     {categories.map((cat) => (
+                     {filteredCategories.map((cat) => (
                          <section key={cat.id} id={cat.id} className="scroll-mt-32 md:scroll-mt-24">
                              <motion.div
                                initial={{ opacity: 0, x: -30 }}

@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   LayoutGrid, Users, Settings, Bell, Search, LogOut, 
-  Plus, ChevronRight, Star, Clock, Menu, X 
+  Plus, ChevronRight, Star, Clock, Menu, X,
+  Mail, BookOpen, UserCheck, Headphones
 } from 'lucide-react';
 import { FEATURED_APPS } from '../constants';
 
@@ -63,18 +64,30 @@ const Dashboard = () => {
         </div>
         
         <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
-           <a href="#" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-blue-50 text-brand-blue">
+           <Link to="/dashboard" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-blue-50 text-brand-blue">
               <LayoutGrid size={20} className="mr-3" /> Dashboard
-           </a>
-           <a href="#" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
-              <Users size={20} className="mr-3" /> My Teams
-           </a>
-           <a href="#" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
-              <Star size={20} className="mr-3" /> Favorites
-           </a>
-           <a href="#" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+           </Link>
+           <Link to="/app/crm" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+              <Users size={20} className="mr-3" /> CRM
+           </Link>
+           <Link to="/app/mail" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+              <Mail size={20} className="mr-3" /> Mail
+           </Link>
+           <Link to="/app/books" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+              <BookOpen size={20} className="mr-3" /> Books
+           </Link>
+           <Link to="/app/people" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+              <UserCheck size={20} className="mr-3" /> People
+           </Link>
+           <Link to="/app/desk" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+              <Headphones size={20} className="mr-3" /> Desk
+           </Link>
+           <Link to="/products" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+              <Plus size={20} className="mr-3" /> Explore Apps
+           </Link>
+           <Link to="/security" className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
               <Settings size={20} className="mr-3" /> Settings
-           </a>
+           </Link>
         </nav>
 
         <div className="p-4 border-t border-gray-100 shrink-0">
@@ -148,7 +161,18 @@ const Dashboard = () => {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                       {FEATURED_APPS.map((app, idx) => (
-                          <div key={idx} onClick={() => navigate('/product/' + app.name.toLowerCase().replace(' ', ''))} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
+                          <div 
+                              key={idx} 
+                              onClick={() => {
+                                  const specificApps = ['crm', 'mail', 'books', 'people', 'desk'];
+                                  if (specificApps.includes(app.id)) {
+                                      navigate(`/app/${app.id}`);
+                                  } else {
+                                      navigate(`/app/${app.id}`);
+                                  }
+                              }} 
+                              className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
+                          >
                               <div className={`w-12 h-12 ${app.color.replace('text-', 'bg-').replace('500', '100')} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                                   <app.icon className={app.color} size={24} />
                               </div>
