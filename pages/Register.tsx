@@ -3,6 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Loader2, AlertCircle, User, Mail, Lock, Phone, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth } from '@/src/services/firebase';
+import { saveUser } from '@/src/services/firestore';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -38,24 +41,41 @@ const Register: React.FC = () => {
 
     setIsLoading(true);
     
-    setTimeout(() => {
-        const nameParts = formData.name.split(' ');
-        const mockUser = {
-            id: 'new_user_101',
+    try {
+        // 1. Create user in Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+        const user = userCredential.user;
+
+        // 2. Set Display Name
+        await updateProfile(user, { displayName: formData.name });
+
+        // 3. Save to Firestore
+        const assignedRole = formData.email === 'sr9723612@gmail.com' ? 'Super Admin' : 'User';
+        await saveUser(user.uid, {
+            name: formData.name,
             email: formData.email,
-            first_name: nameParts[0],
-            last_name: nameParts.slice(1).join(' ') || '',
-            role: 'admin',
-            phone_number: formData.phone
+            phone: formData.phone,
+            role: assignedRole,
+            status: 'Active'
+        });
+
+        const userData = {
+            id: user.uid,
+            email: user.email,
+            name: formData.name,
+            role: assignedRole
         };
 
-        localStorage.setItem('accessToken', 'mock_access_token_new_user');
-        localStorage.setItem('refreshToken', 'mock_refresh_token_new_user');
-        localStorage.setItem('user', JSON.stringify(mockUser));
+        localStorage.setItem('accessToken', 'firebase_auth_active');
+        localStorage.setItem('user', JSON.stringify(userData));
 
         navigate('/dashboard');
+    } catch (err: any) {
+        console.error("Registration Error:", err);
+        setError(err.message || "Failed to create account. Please try again.");
+    } finally {
         setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (

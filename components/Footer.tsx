@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FOOTER_LINKS } from '../constants';
-import { Facebook, Twitter, Linkedin, Youtube, Instagram, Globe, ArrowRight, Smartphone, Code, Cloud, Monitor, Watch, Layout } from 'lucide-react';
+import { Facebook, Twitter, Linkedin, Youtube, Instagram, Globe, ArrowRight, Smartphone, Code, Cloud, Monitor, Watch, Layout, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 
@@ -145,6 +145,9 @@ const Footer: React.FC = () => {
                 <span>•</span>
                 <Link to="/policies" className="hover:text-white">Privacy Policy</Link>
                 <Link to="/policies" className="hover:text-white">Terms of Service</Link>
+                <Link to="/login" className="hover:text-white ml-2 opacity-50 hover:opacity-100 flex items-center">
+                    <Shield size={10} className="mr-1" /> Admin Access
+                </Link>
             </div>
             <div>
                 &copy; 2025 SRXHUB Corporation Pvt. Ltd. All rights reserved.

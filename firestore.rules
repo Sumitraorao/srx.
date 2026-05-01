@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 0. Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() { return request.auth != null; }
+    function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    
+    // Helper to check admin status with email fallback for first turn
+    function isAdmin() { 
+       return isSignedIn() && (
+         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['Admin', 'Super Admin', 'Enterprise Admin']) ||
+         request.auth.token.email == 'sr9723612@gmail.com'
+       ); 
+    }
+    
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    // --- Validation Blueprints ---
+    function isValidUser(data) {
+      return data.keys().hasAll(['name', 'email', 'phone', 'role', 'status', 'joinedAt']) &&
+             data.keys().size() == 6 &&
+             data.name is string && data.name.size() <= 100 &&
+             data.email is string && data.email.size() <= 100 &&
+             data.phone is string && data.phone.size() <= 20 &&
+             data.role in ['User', 'Admin', 'Super Admin', 'Enterprise Admin'] &&
+             data.status in ['Active', 'Inactive', 'Suspended'] &&
+             data.joinedAt is timestamp;
+    }
+
+    function isValidDeal(data) {
+      return data.keys().hasAll(['company', 'value', 'stage', 'ownerId', 'createdAt', 'color']) &&
+             data.keys().size() == 6 &&
+             data.company is string && data.company.size() <= 200 &&
+             data.ownerId == request.auth.uid &&
+             data.createdAt is timestamp;
+    }
+
+    // --- Collection Routes ---
+
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      
+      allow create: if isOwner(userId) && isValidUser(incoming()) && 
+                    (incoming().role == 'User' || request.auth.token.email == 'sr9723612@gmail.com') &&
+                    incoming().joinedAt == request.time;
+                    
+      allow update: if (isOwner(userId) || isAdmin()) && (
+        // Identity protection: owner cannot change their own role or email
+        (isOwner(userId) && !isAdmin() && 
+         incoming().diff(existing()).affectedKeys().hasOnly(['name', 'phone', 'status']) &&
+         incoming().role == existing().role &&
+         incoming().email == existing().email) ||
+        // Super Admin control
+        isAdmin()
+      );
+    }
+
+    match /crm_deals/{dealId} {
+      allow get: if isSignedIn() && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.ownerId == request.auth.uid || isAdmin());
+      
+      allow create: if isVerified() && isValidDeal(incoming()) && incoming().createdAt == request.time;
+      allow update: if (resource.data.ownerId == request.auth.uid || isAdmin()) &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['stage', 'value', 'color']) &&
+                       incoming().company == existing().company &&
+                       incoming().ownerId == existing().ownerId;
+      allow delete: if isAdmin();
+    }
+
+    match /admin_logs/{logId} {
+      allow create: if isSignedIn() && incoming().timestamp == request.time;
+      allow read: if isAdmin();
+    }
+  }
+}

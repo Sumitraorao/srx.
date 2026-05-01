@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { GoogleGenAI } from "@google/genai";
+import { analyzeData, generateCode, generateImage, generateText } from '@/src/services/geminiService';
 
 // --- Types ---
 type MessageType = 'text' | 'code' | 'image' | 'chart' | 'security' | 'file';
@@ -240,143 +240,61 @@ const AiChat: React.FC = () => {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  // --- Real Intelligence Engine using Gemini API ---
+  // --- Real Intelligence Engine using Gemini Service ---
   const generateResponse = async (prompt: string, file: File | null, forceImageMode: boolean = false) => {
     setIsTyping(true);
     
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-        let modelName = 'gemini-3-flash-preview'; 
-        let isImageRequest = forceImageMode;
-
         const lowerPrompt = prompt.toLowerCase();
         const imageKeywords = [
             'generate image', 'create an image', 'draw', 'paint', 'picture of', 'visualize', 'sketch', 'render', 
-            'photo', 'image', 'tasveer', 'chitra', 'banao', 'dikhao', 'khencho', 'pic', 'art', 'generation'
+            'photo', 'image', 'tasveer', 'chitra', 'banao', 'dikhao', 'khencho', 'pic', 'art', 'generation',
+            'generate an image'
         ];
 
-        // Check if user is asking for an image via keywords if not forced
-        if (isImageRequest || imageKeywords.some(keyword => lowerPrompt.includes(keyword))) {
-            modelName = 'gemini-2.5-flash-image';
-            isImageRequest = true;
-        } else if (lowerPrompt.includes('code') || lowerPrompt.includes('program') || lowerPrompt.includes('script') || lowerPrompt.includes('app')) {
-            modelName = 'gemini-3.1-pro-preview';
-        } else {
-            modelName = 'gemini-3-flash-preview';
-        }
+        let result;
+        let type: MessageType = 'text';
+        let data: any = null;
 
-        let contents: any = null;
+        const isImageRequest = forceImageMode || imageKeywords.some(keyword => lowerPrompt.includes(keyword));
+        const isCodeRequest = lowerPrompt.includes('code') || lowerPrompt.includes('program') || lowerPrompt.includes('script') || lowerPrompt.includes('app');
 
-        if (file) {
+        if (isImageRequest) {
+            const imageUrl = await generateImage(prompt);
+            type = 'image';
+            data = { url: imageUrl };
+            result = `Generated result for: "${prompt}"`;
+        } else if (file) {
             const base64Data = await fileToBase64(file);
-            contents = {
-                parts: [
-                    { 
-                        inlineData: { 
-                            mimeType: file.type, 
-                            data: base64Data 
-                        } 
-                    },
-                    { text: prompt || "Analyze this file" }
-                ]
-            };
-        } else {
-             contents = prompt;
-        }
-
-        const response = await ai.models.generateContent({
-            model: modelName,
-            contents: contents
-        });
-
-        const newMessages: Message[] = [];
-        const msgId = Date.now().toString();
-
-        if (response.candidates?.[0]?.content?.parts) {
-            for (const part of response.candidates[0].content.parts) {
-                if (part.inlineData) {
-                    const base64String = part.inlineData.data;
-                    const mimeType = part.inlineData.mimeType || 'image/png';
-                    newMessages.push({
-                        id: msgId + '_img',
-                        role: 'assistant',
-                        type: 'image',
-                        content: isImageRequest ? `Generated result for: "${prompt}"` : "Generated visualization:",
-                        data: { url: `data:${mimeType};base64,${base64String}` },
-                        timestamp: new Date()
-                    });
-                } else if (part.text) {
-                    // Check for code blocks in text
-                    const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
-                    let lastIndex = 0;
-                    let match;
-                    let textFound = false;
-
-                    while ((match = codeBlockRegex.exec(part.text)) !== null) {
-                        textFound = true;
-                        // Text before code block
-                        if (match.index > lastIndex) {
-                            newMessages.push({
-                                id: `${msgId}_text_${lastIndex}`,
-                                role: 'assistant',
-                                type: 'text',
-                                content: part.text.substring(lastIndex, match.index),
-                                timestamp: new Date()
-                            });
-                        }
-                        // Code block
-                        newMessages.push({
-                            id: `${msgId}_code_${match.index}`,
-                            role: 'assistant',
-                            type: 'code',
-                            content: '',
-                            data: { language: match[1] || 'typescript', code: match[2] },
-                            timestamp: new Date()
-                        });
-                        lastIndex = codeBlockRegex.lastIndex;
-                    }
-
-                    if (!textFound) {
-                        newMessages.push({
-                            id: msgId + '_text',
-                            role: 'assistant',
-                            type: 'text',
-                            content: part.text,
-                            timestamp: new Date()
-                        });
-                    } else if (lastIndex < part.text.length) {
-                         newMessages.push({
-                            id: `${msgId}_text_end`,
-                            role: 'assistant',
-                            type: 'text',
-                            content: part.text.substring(lastIndex),
-                            timestamp: new Date()
-                        });
-                    }
-                }
+            // Simulating analysis via text generation with context
+            result = await generateText(`User has uploaded a file (${file.name}, type: ${file.type}). Prompt: ${prompt || "Analyze this file"}`);
+        } else if (isCodeRequest) {
+            const codeOutput = await generateCode(prompt);
+            // Parse code block
+            const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/;
+            const match = codeBlockRegex.exec(codeOutput || '');
+            if (match) {
+                type = 'code';
+                data = { language: match[1] || 'typescript', code: match[2] };
+                result = codeOutput.split('```')[0].trim();
+            } else {
+                result = codeOutput;
             }
-        } else if (response.text) {
-             newMessages.push({
-                id: msgId,
-                role: 'assistant',
-                type: 'text',
-                content: response.text,
-                timestamp: new Date()
-            });
+        } else {
+            result = await generateText(prompt);
         }
 
-        // Fallback
-        if (newMessages.length === 0) {
-             newMessages.push({
-                id: msgId,
-                role: 'assistant',
-                type: 'text',
-                content: "I processed your request but didn't generate a visible output. Please try refining your prompt.",
-                timestamp: new Date()
-            });
-        }
+        const msgId = Date.now().toString();
+        const newMessage: Message = {
+            id: msgId,
+            role: 'assistant',
+            type: type,
+            content: result || 'I am processing your request...',
+            data: data,
+            timestamp: new Date()
+        };
 
-        setMessages(prev => [...prev, ...newMessages]);
+        setMessages(prev => [...prev, newMessage]);
 
     } catch (error: any) {
         console.error("AI Error:", error);
@@ -384,7 +302,7 @@ const AiChat: React.FC = () => {
             id: Date.now().toString(),
             role: 'assistant',
             type: 'text',
-            content: `I encountered an error: ${error.message || "Unknown error"}. Please check if the API key is configured correctly.`,
+            content: `I encountered an error: ${error.message || "Unknown error"}. Please check if the API key is configured correctly in the environment.`,
             timestamp: new Date()
         }]);
     } finally {

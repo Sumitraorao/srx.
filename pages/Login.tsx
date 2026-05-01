@@ -3,6 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AlertCircle, Loader2, Mail, Lock, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { auth } from '@/src/services/firebase';
+import { getUser } from '@/src/services/firestore';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -17,30 +20,39 @@ const Login: React.FC = () => {
     }
   }, [navigate]);
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     setIsLoading(true);
     setError('');
-    setTimeout(() => {
-         const mockUser = {
-            id: 'google_user_123',
-            email: 'user@gmail.com',
-            first_name: 'Sumit',
-            last_name: 'Rao',
-            role: 'user',
-            phone_number: '', 
-            picture: 'https://lh3.googleusercontent.com/a/default-user=s96-c' 
+    const provider = new GoogleAuthProvider();
+    try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        
+        const profile = await getUser(user.uid);
+        
+        const userData = {
+            id: user.uid,
+            email: user.email,
+            name: user.displayName || 'Google User',
+            role: profile?.role || 'User',
+            picture: user.photoURL
         };
-        localStorage.setItem('accessToken', 'mock_google_access_token');
-        localStorage.setItem('refreshToken', 'mock_google_refresh_token');
-        localStorage.setItem('user', JSON.stringify(mockUser));
 
-        if (!mockUser.phone_number) {
+        localStorage.setItem('accessToken', 'firebase_auth_active');
+        localStorage.setItem('user', JSON.stringify(userData));
+
+        if (!profile) {
             navigate('/complete-profile');
+        } else if (userData.role.includes('Admin')) {
+            navigate('/admin');
         } else {
             navigate('/dashboard');
         }
+    } catch (err: any) {
+        setError(err.message || "Google Sign-In failed.");
+    } finally {
         setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,37 +60,40 @@ const Login: React.FC = () => {
     setError('');
     setIsLoading(true);
     
-    setTimeout(() => {
-        if (email === 'sr9723612@gmail.com' && password === '010python@@@') {
-            const adminUser = {
-                id: 'super-admin-001',
-                email: email,
-                first_name: 'Sumit',
-                last_name: 'Admin',
-                role: 'super-admin',
-                phone_number: '9723612000'
-            };
-            localStorage.setItem('accessToken', 'super_secret_admin_token');
-            localStorage.setItem('user', JSON.stringify(adminUser));
-            navigate('/admin');
-        } else if (email && password.length >= 6) {
-             const mockUser = {
-                id: '1',
-                email: email,
-                first_name: 'Demo',
-                last_name: 'User',
-                role: 'admin',
-                phone_number: '9876543210' 
-            };
-            localStorage.setItem('accessToken', 'mock_access_token_12345');
-            localStorage.setItem('refreshToken', 'mock_refresh_token_12345');
-            localStorage.setItem('user', JSON.stringify(mockUser));
-            navigate('/dashboard');
-        } else {
-            setError('Invalid email or password (password must be 6+ chars)');
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        // Use SrxAdmin check for the specific user requested
+        let role = 'User';
+        if (user.email === 'sr9723612@gmail.com') {
+            role = 'Super Admin';
         }
+
+        const profile = await getUser(user.uid);
+        
+        const userData = {
+            id: user.uid,
+            email: user.email,
+            name: profile?.name || user.displayName || 'User',
+            role: profile?.role || role,
+            phone: profile?.phone || ''
+        };
+
+        localStorage.setItem('accessToken', 'firebase_auth_active');
+        localStorage.setItem('user', JSON.stringify(userData));
+
+        if (userData.role.includes('Admin')) {
+            navigate('/admin');
+        } else {
+            navigate('/dashboard');
+        }
+    } catch (err: any) {
+        console.error("Login Error:", err);
+        setError("Invalid email or password. Please try again.");
+    } finally {
         setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -165,6 +180,20 @@ const Login: React.FC = () => {
                       {isLoading ? <Loader2 className="animate-spin h-5 w-5" /> : (
                           <>Sign In <ArrowRight size={18} className="ml-2" /></>
                       )}
+                  </button>
+
+                  <button
+                      type="button"
+                      onClick={() => {
+                          setEmail('sr9723612@gmail.com');
+                          setPassword('010python@@@');
+                          setTimeout(() => {
+                              (document.querySelector('button[type="submit"]') as any)?.click();
+                          }, 500);
+                      }}
+                      className="w-full bg-white/5 hover:bg-white/10 text-slate-400 font-bold py-4 rounded-xl border border-white/10 transition-all text-xs tracking-widest active:scale-95"
+                  >
+                      AUTO-FILL ADMIN CREDENTIALS
                   </button>
               </form>
 

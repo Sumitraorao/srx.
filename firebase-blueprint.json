@@ -1,0 +1,58 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "role": { "type": "string", "enum": ["User", "Admin", "Super Admin", "Enterprise Admin"] },
+        "status": { "type": "string", "enum": ["Active", "Inactive", "Suspended"] },
+        "joinedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "role", "status", "joinedAt"]
+    },
+    "CrmDeal": {
+      "title": "CRM Deal",
+      "description": "Business deal or lead",
+      "type": "object",
+      "properties": {
+        "company": { "type": "string" },
+        "value": { "type": "string" },
+        "stage": { "type": "string" },
+        "color": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["company", "value", "stage", "ownerId", "createdAt"]
+    },
+    "AdminLog": {
+      "title": "Admin Log",
+      "description": "System and security logs",
+      "type": "object",
+      "properties": {
+        "timestamp": { "type": "string", "format": "date-time" },
+        "level": { "type": "string" },
+        "message": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["timestamp", "level", "message"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User collection for registration and profiles"
+    },
+    "/crm_deals/{dealId}": {
+      "schema": "CrmDeal",
+      "description": "Business deals in the dashboard"
+    },
+    "/admin_logs/{logId}": {
+      "schema": "AdminLog",
+      "description": "System telemetry and audit logs"
+    }
+  }
+}
