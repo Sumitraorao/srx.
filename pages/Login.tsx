@@ -90,7 +90,13 @@ const Login: React.FC = () => {
         }
     } catch (err: any) {
         console.error("Login Error:", err);
-        setError("Invalid email or password. Please try again.");
+        if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found') {
+            setError("Account not found or password incorrect. If you haven't registered since the Firebase setup, please Sign Up first.");
+        } else if (err.code === 'auth/wrong-password') {
+            setError("Incorrect password. Please try again or reset it.");
+        } else {
+            setError(err.message || "Invalid email or password. Please try again.");
+        }
     } finally {
         setIsLoading(false);
     }
