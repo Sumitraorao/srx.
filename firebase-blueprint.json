@@ -2,57 +2,57 @@
   "entities": {
     "User": {
       "title": "User",
-      "description": "User profile information",
+      "description": "User profile and role info",
       "type": "object",
       "properties": {
         "name": { "type": "string" },
-        "email": { "type": "string", "format": "email" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["Admin", "Manager", "Sales Rep", "Viewer"] },
+        "avatar": { "type": "string" }
+      }
+    },
+    "Contact": {
+      "title": "Contact",
+      "description": "Individual person or business contact",
+      "type": "object",
+      "properties": {
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "email": { "type": "string" },
         "phone": { "type": "string" },
-        "role": { "type": "string", "enum": ["User", "Admin", "Super Admin", "Enterprise Admin"] },
-        "status": { "type": "string", "enum": ["Active", "Inactive", "Suspended"] },
-        "joinedAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["name", "email", "role", "status", "joinedAt"]
-    },
-    "CrmDeal": {
-      "title": "CRM Deal",
-      "description": "Business deal or lead",
-      "type": "object",
-      "properties": {
         "company": { "type": "string" },
-        "value": { "type": "string" },
-        "stage": { "type": "string" },
-        "color": { "type": "string" },
-        "ownerId": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["company", "value", "stage", "ownerId", "createdAt"]
+        "source": { "type": "string" },
+        "tags": { "type": "array" }
+      }
     },
-    "AdminLog": {
-      "title": "Admin Log",
-      "description": "System and security logs",
+    "Lead": {
+      "title": "Lead",
       "type": "object",
       "properties": {
-        "timestamp": { "type": "string", "format": "date-time" },
-        "level": { "type": "string" },
-        "message": { "type": "string" },
-        "userId": { "type": "string" }
-      },
-      "required": ["timestamp", "level", "message"]
+        "title": { "type": "string" },
+        "status": { "type": "string", "enum": ["New", "Contacted", "Qualified", "Lost"] },
+        "score": { "type": "number" },
+        "value": { "type": "number" },
+        "ownerId": { "type": "string" }
+      }
+    },
+    "Deal": {
+        "title": "Deal",
+        "type": "object",
+        "properties": {
+            "name": { "type": "string" },
+            "amount": { "type": "number" },
+            "stage": { "type": "string" },
+            "expectedCloseDate": { "type": "string" },
+            "probability": { "type": "number" }
+        }
     }
   },
   "firestore": {
-    "/users/{userId}": {
-      "schema": "User",
-      "description": "User collection for registration and profiles"
-    },
-    "/crm_deals/{dealId}": {
-      "schema": "CrmDeal",
-      "description": "Business deals in the dashboard"
-    },
-    "/admin_logs/{logId}": {
-      "schema": "AdminLog",
-      "description": "System telemetry and audit logs"
-    }
+    "/users/{userId}": { "schema": "User", "description": "System users" },
+    "/contacts/{contactId}": { "schema": "Contact", "description": "CRM Contacts" },
+    "/leads/{leadId}": { "schema": "Lead", "description": "Sales Leads" },
+    "/deals/{dealId}": { "schema": "Deal", "description": "Pipeline Deals" },
+    "/tasks/{taskId}": { "schema": "Task", "description": "Activities" }
   }
 }

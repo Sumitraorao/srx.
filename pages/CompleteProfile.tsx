@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Loader2, ArrowRight, ShieldCheck } from 'lucide-react';
+import { saveUser } from '@/src/services/firestore';
+import { auth } from '@/src/services/firebase';
 
 const CompleteProfile: React.FC = () => {
   const navigate = useNavigate();
@@ -59,12 +61,35 @@ const CompleteProfile: React.FC = () => {
   const handleVerifyOtp = async () => {
       setIsLoading(true);
       
-      setTimeout(() => {
-          const updatedUser = { ...user, phone_number: phoneNumber };
+      try {
+          const firebaseUser = auth.currentUser;
+          if (!firebaseUser) throw new Error("No active session found.");
+
+          const userData = {
+              name: user.name || firebaseUser.displayName || 'User',
+              email: firebaseUser.email,
+              phone: phoneNumber,
+              role: firebaseUser.email === 'sr9723612@gmail.com' ? 'Super Admin' : 'User',
+              status: 'Active'
+          };
+
+          await saveUser(firebaseUser.uid, userData);
+
+          const updatedUser = { 
+              ...user, 
+              phone: phoneNumber,
+              role: userData.role
+          };
           localStorage.setItem('user', JSON.stringify(updatedUser));
+          localStorage.setItem('accessToken', 'firebase_auth_active');
+          
           navigate('/dashboard');
+      } catch (err: any) {
+          console.error("Verification Error:", err);
+          alert("Failed to save profile: " + err.message);
+      } finally {
           setIsLoading(false);
-      }, 1500);
+      }
   };
 
   if (!user) return null;

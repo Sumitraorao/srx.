@@ -63,6 +63,8 @@ const Register: React.FC = () => {
             id: user.uid,
             email: user.email,
             name: formData.name,
+            first_name: formData.name.split(' ')[0],
+            last_name: formData.name.split(' ').slice(1).join(' '),
             role: assignedRole
         };
 

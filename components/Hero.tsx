@@ -54,7 +54,7 @@ const Hero: React.FC = () => {
                transition={{ delay: 0.5 }}
             >
               <Link 
-                to={isLoggedIn ? "/dashboard" : "/register"} 
+                to={isLoggedIn ? "/app/crm" : "/register"} 
                 className="inline-block bg-brand-red hover:bg-brand-darkRed text-white text-lg font-bold py-4 px-8 rounded shadow-lg transition-all hover:-translate-y-1 active:translate-y-0 active:scale-95"
               >
                 {isLoggedIn ? "GO TO DASHBOARD" : "GET STARTED FOR FREE"}

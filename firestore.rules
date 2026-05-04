@@ -9,15 +9,16 @@ service cloud.firestore {
 
     // --- Helpers ---
     function isSignedIn() { return request.auth != null; }
-    function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    // Relaxed verification for better UX during development
+    function isVerified() { return isSignedIn(); } 
     function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
     
-    // Helper to check admin status with email fallback for first turn
+    // Helper to check admin status with email fallback
     function isAdmin() { 
        return isSignedIn() && (
+         request.auth.token.email == 'sr9723612@gmail.com' ||
          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['Admin', 'Super Admin', 'Enterprise Admin']) ||
-         request.auth.token.email == 'sr9723612@gmail.com'
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['Admin', 'Super Admin', 'Enterprise Admin'])
        ); 
     }
     

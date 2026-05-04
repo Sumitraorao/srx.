@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { analyzeData } from '@/src/services/geminiService';
 import { listUsers } from '@/src/services/firestore';
+import { auth } from '../src/services/firebase';
 
 // Mock Data
 const MOCK_REVENUE_DATA = [
@@ -43,6 +44,7 @@ const AdminPanel: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [users, setUsers] = useState<any[]>([]);
+    const [isInitializing, setIsInitializing] = useState(true);
 
     const filteredUsers = users.length > 0 ? users.filter(user => 
         (user.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -51,32 +53,58 @@ const AdminPanel: React.FC = () => {
     ) : [];
 
     useEffect(() => {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        if (user.email !== 'sr9723612@gmail.com') {
-            // Check if we are in dev/preview mode and allow access if no user
-            if (!user.email) {
-                console.warn("Dev mode: No user found, but allowing access for testing.");
-                setAdmin({ email: 'preview@srxhub.ai', name: 'Preview Admin' });
-            } else {
-                navigate('/dashboard');
-                return;
+        const checkAuth = () => {
+            const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+            if (storedUser.email === 'sr9723612@gmail.com') {
+                setAdmin(storedUser);
+                setIsInitializing(false);
             }
-        }
-        setAdmin(user);
 
-        // Fetch real users from Firestore
+            const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
+                if (firebaseUser) {
+                    if (firebaseUser.email === 'sr9723612@gmail.com') {
+                        const userData = {
+                            id: firebaseUser.uid,
+                            email: firebaseUser.email,
+                            name: firebaseUser.displayName || 'Admin',
+                            first_name: (firebaseUser.displayName || 'Admin').split(' ')[0],
+                            last_name: (firebaseUser.displayName || '').split(' ').slice(1).join(' '),
+                            role: 'Super Admin'
+                        };
+                        localStorage.setItem('user', JSON.stringify(userData));
+                        setAdmin(userData);
+                    } else if (!localStorage.getItem('user')) {
+                        navigate('/dashboard');
+                    }
+                } else {
+                    if (!localStorage.getItem('user')) {
+                        navigate('/login');
+                    }
+                }
+                setIsInitializing(false);
+            });
+
+            return unsubscribe;
+        };
+
+        const unsubscribeAuth = checkAuth();
+
         const fetchUsers = async () => {
-        try {
-            const fetchedUsers = await listUsers();
-            if (fetchedUsers && fetchedUsers.length > 0) {
-                setUsers(fetchedUsers);
+            try {
+                const fetchedUsers = await listUsers();
+                if (fetchedUsers && fetchedUsers.length > 0) {
+                    setUsers(fetchedUsers);
+                }
+            } catch (error) {
+                console.error("Failed to fetch users:", error);
             }
-        } catch (error) {
-            console.error("Failed to fetch users:", error);
-        }
-    };
-    fetchUsers();
-}, [navigate]);
+        };
+        fetchUsers();
+
+        return () => {
+            if (typeof unsubscribeAuth === 'function') unsubscribeAuth();
+        };
+    }, [navigate]);
 
 const [settings, setSettings] = useState([
     { id: '2fa', label: 'Two-Factor Auth', desc: 'Enforce 2FA for all admin roles', active: true },
@@ -149,8 +177,21 @@ const handleExport = () => {
     const handleLogout = () => {
         localStorage.removeItem('user');
         localStorage.removeItem('accessToken');
+        auth.signOut();
         navigate('/login');
     };
+
+    if (isInitializing) {
+        return (
+            <div className="h-screen bg-[#0f172a] flex items-center justify-center font-sans tracking-tight text-white">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-6 shadow-[0_0_20px_rgba(79,70,229,0.3)]"></div>
+                    <p className="text-indigo-400 font-black uppercase text-sm tracking-[0.2em]">Restoring Admin Session...</p>
+                    <p className="text-slate-500 text-xs mt-2 font-mono">ENCRYPTED CHANNEL SECURED</p>
+                </div>
+            </div>
+        );
+    }
 
     if (!admin) return null;
 

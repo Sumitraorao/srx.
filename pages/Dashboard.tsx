@@ -7,27 +7,73 @@ import {
   Mail, BookOpen, UserCheck, Headphones, Shield
 } from 'lucide-react';
 import { FEATURED_APPS } from '../constants';
+import { auth } from '../src/services/firebase';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    } else {
-      navigate('/login');
-    }
+    const checkAuth = () => {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+        setIsInitializing(false);
+      }
+
+      // Direct Firebase check
+      const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
+        if (firebaseUser) {
+          if (!localStorage.getItem('user')) {
+             const userData = {
+               id: firebaseUser.uid,
+               email: firebaseUser.email,
+               name: firebaseUser.displayName || 'User',
+               first_name: (firebaseUser.displayName || 'User').split(' ')[0],
+               last_name: (firebaseUser.displayName || '').split(' ').slice(1).join(' '),
+               role: 'User'
+             };
+             localStorage.setItem('user', JSON.stringify(userData));
+             setUser(userData);
+          }
+          setIsInitializing(false);
+        } else {
+          if (!localStorage.getItem('user')) {
+            navigate('/login');
+          }
+          setIsInitializing(false);
+        }
+      });
+
+      return unsubscribe;
+    };
+
+    const unsubscribe = checkAuth();
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
   }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    auth.signOut();
     navigate('/login');
   };
+
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 font-sans">
+        <div className="text-center">
+            <div className="w-12 h-12 border-4 border-brand-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-500 font-medium">Restoring Session...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) return null;
 

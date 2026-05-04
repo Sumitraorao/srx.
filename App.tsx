@@ -22,13 +22,16 @@ import Policies from './pages/Policies';
 import MobileApps from './pages/MobileApps';
 import DeveloperCenter from './pages/DeveloperCenter';
 import About from './pages/About';
-import CrmApp from './pages/CrmApp';
 import MailApp from './pages/MailApp';
 import BooksApp from './pages/BooksApp';
 import PeopleApp from './pages/PeopleApp';
 import DeskApp from './pages/DeskApp';
 import GenericApp from './pages/GenericApp';
 import AdminPanel from './pages/AdminPanel';
+import { CrmLayout } from './src/components/crm/CrmLayout';
+import { CrmDashboard } from './pages/crm/Dashboard';
+import { LeadsKanban } from './pages/crm/Leads';
+import { ContactsList } from './pages/crm/Contacts';
 
 // Scroll to top on route change
 const ScrollToTop = () => {
@@ -77,7 +80,17 @@ function App() {
           <Route path="/mobile-apps" element={<MobileApps />} />
           <Route path="/developer-center" element={<DeveloperCenter />} />
           <Route path="/admin" element={<AdminPanel />} />
-          <Route path="/app/crm" element={<CrmApp />} />
+          <Route path="/app/crm" element={<CrmLayout />}>
+            <Route index element={<CrmDashboard />} />
+            <Route path="leads" element={<LeadsKanban />} />
+            <Route path="deals" element={<div className="p-8">Deals (Coming Soon)</div>} />
+            <Route path="contacts" element={<ContactsList />} />
+            <Route path="tasks" element={<div className="p-8">Tasks (Coming Soon)</div>} />
+            <Route path="email" element={<div className="p-8">Email (Coming Soon)</div>} />
+            <Route path="reports" element={<div className="p-8">Reports (Coming Soon)</div>} />
+            <Route path="automations" element={<div className="p-8">Automations (Coming Soon)</div>} />
+            <Route path="settings" element={<div className="p-8">Settings (Coming Soon)</div>} />
+          </Route>
           <Route path="/app/mail" element={<MailApp />} />
           <Route path="/app/books" element={<BooksApp />} />
           <Route path="/app/people" element={<PeopleApp />} />

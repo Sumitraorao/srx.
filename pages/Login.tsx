@@ -34,6 +34,8 @@ const Login: React.FC = () => {
             id: user.uid,
             email: user.email,
             name: user.displayName || 'Google User',
+            first_name: (user.displayName || 'Google User').split(' ')[0],
+            last_name: (user.displayName || '').split(' ').slice(1).join(' '),
             role: profile?.role || 'User',
             picture: user.photoURL
         };
@@ -76,6 +78,8 @@ const Login: React.FC = () => {
             id: user.uid,
             email: user.email,
             name: profile?.name || user.displayName || 'User',
+            first_name: (profile?.name || user.displayName || 'User').split(' ')[0],
+            last_name: (profile?.name || user.displayName || '').split(' ').slice(1).join(' '),
             role: profile?.role || role,
             phone: profile?.phone || ''
         };

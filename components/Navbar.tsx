@@ -5,6 +5,7 @@ import { NAV_ITEMS, ENTERPRISE_NAV_ITEMS } from '../constants';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ProductsMenu from './ProductsMenu';
 import { motion, AnimatePresence } from 'motion/react';
+import { auth } from '../src/services/firebase';
 
 const Navbar: React.FC = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -19,23 +20,41 @@ const Navbar: React.FC = () => {
 
   // Check authentication status on mount and route change
   useEffect(() => {
-    const checkAuth = () => {
-      const storedUser = localStorage.getItem('user');
-      const accessToken = localStorage.getItem('accessToken');
-      
-      if (accessToken && storedUser) {
-        try {
-          setUser(JSON.parse(storedUser));
-        } catch (e) {
-          console.error("Error parsing user data", e);
-          setUser(null);
-        }
-      } else {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
         setUser(null);
       }
-    };
-    checkAuth();
-  }, [location]);
+    }
+
+    // Direct Firebase session check for persistence (esp. on Vercel)
+    const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
+      if (firebaseUser) {
+        // If we have a firebase session but no local user data or its stale, restore it
+        const currentStoredUser = localStorage.getItem('user');
+        if (!currentStoredUser || JSON.parse(currentStoredUser).id !== firebaseUser.uid) {
+           const userData = {
+               id: firebaseUser.uid,
+               email: firebaseUser.email,
+               name: firebaseUser.displayName || 'User',
+               first_name: (firebaseUser.displayName || 'User').split(' ')[0],
+               last_name: (firebaseUser.displayName || '').split(' ').slice(1).join(' '),
+               role: 'User' // Default role, will be refined if they navigate to dashboard
+           };
+           localStorage.setItem('user', JSON.stringify(userData));
+           localStorage.setItem('accessToken', 'firebase_auth_active');
+           setUser(userData);
+        }
+      } else {
+        // Explicitly logged out from Firebase
+        setUser(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [location.pathname]);
 
   // Close menus when route changes
   useEffect(() => {
@@ -226,7 +245,7 @@ const Navbar: React.FC = () => {
                   : (user ? 'bg-brand-blue text-white hover:bg-blue-700' : 'bg-brand-red text-white hover:bg-brand-darkRed')
               }`}
             >
-              {isEnterprise ? 'Contact Sales' : (user ? 'Open App' : 'Sign Up')}
+              {isEnterprise ? 'Contact Sales' : (user ? 'Go to Dashboard' : 'Sign Up')}
             </button>
           </div>
 
